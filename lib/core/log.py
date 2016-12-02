@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-__author__ = 'xy'
+# -*- coding: utf-8 -*-
+# author = i@cdxy.me
+# project = https://github.com/Xyntax/POC-T
 
 import logging
 import sys
@@ -36,7 +38,7 @@ try:
 except ImportError:
     LOGGER_HANDLER = logging.StreamHandler(sys.stdout)
 
-# there can't be -> if conf['DEBUG']:
+# there can't be -> if conf.DEBUG:
 if "debug" in sys.argv:
     FORMATTER = logging.Formatter("\r[%(asctime)s] [%(levelname)s] %(message)s", "%H:%M:%S")
 else:

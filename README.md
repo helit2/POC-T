@@ -1,141 +1,143 @@
-# POC-T
-[![Python 2.6|2.7](https://img.shields.io/badge/python-2.6|2.7-yellow.svg)](https://www.python.org/) [![License](https://img.shields.io/badge/license-GPLv2-red.svg)](https://raw.githubusercontent.com/Xyntax/POC-T/master/docs/LICENSE.txt)  
+# POC-T: *Pentest Over Concurrent Toolkit* 
+[![Python 2.7](https://img.shields.io/badge/python-2.7-yellow.svg)](https://www.python.org/) [![License](https://img.shields.io/badge/license-GPLv2-red.svg)](https://raw.githubusercontent.com/Xyntax/POC-T/master/doc/LICENSE.txt) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1413552d34bc4a4aa84539db1780eb56)](https://www.codacy.com/app/xyntax/POC-T?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Xyntax/POC-T&amp;utm_campaign=Badge_Grade) 
 
-> 跨平台模块化并发框架，可用于采集/爬虫/爆破/批量PoC等任何需要并发的地方。
-
-* 支持两种并发模式*(多线程/单线程异步)*和多种输入方式
-* 极简式模块编写
-* 无交互运行，方便部署自动化
-* 实用工具/PoC更新中
-
-*(欢迎提交代码和改进建议)*
+> 脚本调用框架，用于渗透测试中 **采集|爬虫|爆破|批量PoC** 等需要并发的任务。
   
-![banner.png](https://github.com/Xyntax/POC-T/blob/cdxy/docs/banner.png) 
+* 两种并发模式、五种信息输入格式  
+* 极简式脚本编写，无需参考文档  
+* 脚本扩展工具，简化重复工作  
+* 支持第三方搜索引擎API(已完成ZoomEye/Shodan)  
+   
+![banner.png](https://github.com/Xyntax/POC-T/blob/master/doc/banner.png) 
 
-## 它能做什么？  
+## 不止于PoC 
 这个小巧的并发框架可以满足许多日常需求.  
-用户可参考以下已集成的脚本来编写自己的功能模块.    
+用户可参考以下已经集成的脚本，打开脑洞，自行编写更多实用脚本.      
 
-#### 漏洞验证 
-|模块|说明|
-|:---|:---|
-|`./module/sqli-poc-example.py`| SQL注入PoC示例(方正翔宇某系统)|  
-|`./module/jboss-poc.py`       | jboss漏洞PoC(jexboss去后门版)|  
-|`./module/struts2-s2032.py`   | Struts2 S2-032 远程命令执行|  
-|`./module/zonetransfer-poc.py`| DNS域传送漏洞PoC|
-  
-#### 爆破&扫描 
-|模块|说明|
-|:---|:---|
-|`./module/zabbix-weakpass.py`  |zabbix弱口令扫描|  
-|`./module/brute-example.py`    |密码爆破示例(51idc某站)|
-  
-#### 爬虫&采集
-|模块|说明|
-|:---|:---|
-|`./module/spider-example.py`   |爬虫示例(B站用户签名档爬虫)|  
-|`./module/collector-example.py`|页面采集示例|  
-  
-#### 其他 
-|模块|说明|
-|:---|:---|
-|`./module/vote-example.py`     |给基友开发的刷票脚本|  
-|`others`|等你开脑洞|  
-  
+* [查看已集成脚本](https://github.com/Xyntax/POC-T/blob/master/doc/SCRIPT.md)
 
+## 快速开始   
 
+`git clone https://github.com/Xyntax/POC-T`  
+`pip install -r requirement.txt`   
+`python POC-T.py`     
   
-## 快速开始 
-* `pip install -r requirement.txt` 
-* `python POC-T.py`  
+## 使用说明 
 
-### 参数中文说明 
-```
-usage: POC-T.py [-T|-C] [-m] [-f|-i|-n] [options]
-  
-example:
-    python POC-T.py -T -m test -f ./dic/1-100.txt
-    python POC-T.py -C -m test -i 1-100
-    python POC-T.py -C -m spider-example -n 10.0.0.0/24
-  
-engine:
-  -T                多线程模式
-  -C                协程(单线程异步)模式
-  -t [num]          设置并发数量(线程数量)
-  
-module:
-  -m [module]       指定加载的PoC或模块名称
+![usage.png](https://github.com/Xyntax/POC-T/blob/master/doc/usage.png) 
 
-target mode:
-  -f [target]       从文件加载目标列表(常用于扫描或批量漏洞验证)
-  -i [start]-[end]  给定起始数字和结束数字，自动生成payload(常用于有数字规则的遍历，爬虫等)
-  -n [IP/MASK]      从IP和子网掩码加载目标，如:10.0.0.0/28 (用于扫描网段)
-
-optimization:
-  -o [output]       输出文件路径，默认保存在./output/目录下
-  --single          当验证到一个结果时退出(常用于密码爆破)
-  --nF              取消文件输出
-  --nS              取消屏幕输出
-  --show            显示./module/文件夹下所有可用的模块名称
-  --debug           开启debug模式，输出一些细节
-  --update          自动从github更新程序
-```  
-  
-  
 ## 结构  
-以下含@的目录表示用户可控区域，用户可根据需要*增加/修改/调用*其中的内容
+以下含@的目录表示用户可控区域，用户可根据需要*增加|修改|调用*其中的内容
 
 | 目录 | 说明 |
 | :-----  |:-----|
 | `POC-T.py` | 程序入口 |
-| module   | @自定义模块/PoC脚本库 |
-| util     | @工具库 |
-| data     | @资源库 |
-| output   | 默认输出位置 |
-| lib      | 项目代码 |
-| docs     | 文档及版权声明 |
+| script     | @脚本库 |
+| plugin       | @工具库 |
+| data       | @资源库 |
+| output     | 默认输出位置 |
+| lib        | 项目代码 |
+| doc        | 文档及版权声明 |
 | thirdparty | 第三方库 |
+| api        | 搜索引擎接口 |
 
   
-## 模块编写
-极简式模块编写，它只需要声明一个函数作为接口，没有其他任何限制．
+## 自定义脚本
+编写自定义脚本，只需要声明一个函数作为接口，没有其他任何限制．  
+从此告别文档，无需记忆函数名和模板调用，使效率最大化．
 
 #### 新建文件
-* 进入`./module`目录
+* 进入`./script`目录
 * 在此目录下新建Python文件 `poctest.py`
 
-#### 添加接口函数-poc()
+#### 添加接口函数
 * 在代码中添加函数 **poc()**
 * 添加逻辑使验证成功(漏洞存在)时`return True`,验证失败时`return False`
-* (程序运行时，每个子线程调用该文件的poc()方法，并将队列中的取出的字符串传入该方法)
+* (程序运行时，每个子线程调用该文件的`poc()`方法，并将队列中的取出的字符串传入该方法)  
+
 ```
 def poc(input_str):
     return True or false
 ```  
-#### 查看及使用模块
-* `python POC-T.py --show` 查看全部模块名称
-* 在命令行中使用 `-m poctest` 参数即可完成`poctest`模块的加载 (注意名称末尾不需要写`.py`)  
+
+#### 查看及使用脚本
+* `python POC-T.py --show` 查看`./script`文件夹下全部脚本名称
+* 在命令行中使用 `-m poctest` 可加载`script`文件夹下的`poctest.py`脚本，或者 `-m /home/xy/xxx/poctest.py`加载任意路径的脚本
   
-工具目录 
-----
-`util`文件夹中收集了具有通用性的工具组件．用于简化代码，提高PoC准确性，赋予脚本更多功能.
-编写模块时，可以使用`from util.xxx import xxx()`直接调用，具体功能请查看原文件注释.  
+#### (可选)结果判断
+针对一些复杂的需求，`poc()`函数可以使用多种返回值来控制验证状态和输出。  
+以下模拟一个简单的密码爆破脚本代码  
+  
+```
+def poc(input_str):
+    url = 'http://xxx.com/login.php?pass=' + input_str
+    try:
+        c = requests.get(url).content
+    except ConnectionError:
+        return 2     # 把input_str再次加入任务队列重新验证(本次验证作废)
+    if 'success' in c:
+        return True  # 验证成功，屏幕结果输出为123456
+        return 1     # 同上
+        return url   # 验证成功，屏幕结果输出为"http://xxx.com/login.php?pass=123456"
+    else
+        return False # 验证失败，无输出
+        return 0     # 同上
+
+```
+
+
+脚本扩展工具 
+------
+`plugin`文件夹中收集了具有通用性的脚本扩展工具．用于简化代码，提高PoC准确性，赋予脚本更多功能.
+编写脚本时，可以使用`from plugin.xxx import xxx()`直接调用，具体功能请查看原文件注释.  
   
 |工具|说明|
 |:---|:---|
-|urlparser.py |URL处理工具，可对采集到的杂乱URL进行格式化/自动生成等|
-|useragent.py |User-Agent处理工具, 支持随机化UA以绕过防御规则|
+|urlparser.py | URL处理工具,可对采集到的杂乱URL进行格式化/自动生成等|
+|useragent.py | User-Agent处理工具,支持随机化UA以绕过防御规则|
+|extracts.py  | 正则提取工具,从采集到的杂乱文本中筛选IP地址|
+|static.py    | 存储静态资源,如常见端口号等 |
+|util.py      | 常用函数,处理随机值/MD5/302跳转/格式转换等|
+|cloudeye.py  | cloudeye.me功能接口,在PoC中查询DNS和HTTP日志|
+
+
+第三方搜索引擎接口
+---------
+
+本工具拟支持主流空间搜索引擎的API，如ZoomEye/Shodan/Censys等(目前已支持ZoomEye/Shodan)。  
+从搜索引擎中直接获取目标，并结合本地脚本进行扫描。
+
+#### ZoomEye
+以下命令表示使用ZoomEye接口，搜索全网中开启`8080`号端口的服务，并使用`test.py`脚本进行验证．  
+设置爬取10页搜索结果，搜索结果将存入本地`./data/zoomeye`文件夹下．  
+
+`python POC-T.py -T -m test --api --dork "port:8080" --max-page 10`  
+  
+如第一次使用接口，需按提示输入ZoomEye的帐号和密码．  
+ZoomEye现已开放注册，普通用户每月可以通过API下载5000页的搜索结果．  
+
+* [ZoomEye-API官方文档](https://www.zoomeye.org/api/doc)
+
+#### Shodan
+以下命令表示使用Shodan接口，搜索全网中关键字为`solr`，国家为`cn`的服务，并使用`solr-unauth`脚本进行验证．  
+设置从第0条记录为起点，爬取10条记录，搜索结果将存入本地`./data/shodan`文件夹下．  
+  
+`python POC-T.py -T -m solr-unauth --api --query "solr country:cn" --limit 10 --offset 0`  
+  
+如第一次使用接口，需按提示输入Shodan的API-KEY([https://account.shodan.io/](https://account.shodan.io/))  
+Shodan-API接口使用限制及详细功能，可参考官方文档.
+
+* [Shodan-API官方文档](https://developer.shodan.io/api/requirements)
 
 相关链接
 ----
-* [感谢列表](./docs/THANKS.md)
-* [开发日志](./docs/CHANGELOG.md)
-* [版权声明](./docs/LICENSE.txt)
-* [中文文档](./docs/USAGE.md)
+* [感谢列表](./doc/THANKS.md)
+* [开发日志](./doc/CHANGELOG.md)
+* [版权声明](./doc/LICENSE.txt)
 * [问题/BUG反馈](https://github.com/Xyntax/POC-T/issues)
 
 联系作者
 ----
 * mail:i@cdxy.me  
-* 博客:[http://www.cdxy.me](http://www.cdxy.me)  
+
   

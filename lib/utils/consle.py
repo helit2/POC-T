@@ -1,11 +1,14 @@
-# !/usr/bin/env python
-#  -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# author = i@cdxy.me
+# project = https://github.com/Xyntax/POC-T
 
 """
 getTerminalSize()
  - get width and height of console
  - works on linux,os x,windows,cygwin(windows)
 """
+
 import os
 
 __all__ = ['getTerminalSize']
@@ -40,7 +43,7 @@ def _getTerminalSize_windows():
         h = windll.kernel32.GetStdHandle(-12)
         csbi = create_string_buffer(22)
         res = windll.kernel32.GetConsoleScreenBufferInfo(h, csbi)
-    except:
+    except Exception:
         return None
     if res:
         import struct
@@ -65,16 +68,16 @@ def _getTerminalSize_tput():
         output = proc.communicate(input=None)
         rows = int(output[0])
         return (cols, rows)
-    except:
+    except Exception:
         return None
 
 
 def _getTerminalSize_linux():
     def ioctl_GWINSZ(fd):
         try:
-            import fcntl, termios, struct, os
+            import fcntl, termios, struct
             cr = struct.unpack('hh', fcntl.ioctl(fd, termios.TIOCGWINSZ, '1234'))
-        except:
+        except Exception:
             return None
         return cr
 
@@ -84,12 +87,12 @@ def _getTerminalSize_linux():
             fd = os.open(os.ctermid(), os.O_RDONLY)
             cr = ioctl_GWINSZ(fd)
             os.close(fd)
-        except:
+        except Exception:
             pass
     if not cr:
         try:
             cr = (env['LINES'], env['COLUMNS'])
-        except:
+        except Exception:
             return None
     return int(cr[1]), int(cr[0])
 

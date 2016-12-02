@@ -1,6 +1,7 @@
-# !/usr/bin/env python
-#  -*- coding: utf-8 -*-
-__author__ = 'xy'
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# author = i@cdxy.me
+# project = https://github.com/Xyntax/POC-T
 
 import locale
 import os
@@ -17,13 +18,14 @@ from lib.core.settings import GIT_REPOSITORY
 from lib.core.settings import IS_WIN
 from lib.core.revision import getRevisionNumber
 
+
 def update():
-    if not conf['UPDATE']:
+    if not conf.UPDATE:
         return
 
     success = False
 
-    if not os.path.exists(os.path.join(paths['ROOT_PATH'], ".git")):
+    if not os.path.exists(os.path.join(paths.ROOT_PATH, ".git")):
         errMsg = "not a git repository. Please checkout the 'Xyntax/POC-T' repository "
         errMsg += "from GitHub (e.g. 'git clone https://github.com/Xyntax/POC-T.git POC-T')"
         logger.error(errMsg)
@@ -38,7 +40,9 @@ def update():
         logger.info("update in progress ")
 
         try:
-            process = execute("git checkout . && git pull %s HEAD" % GIT_REPOSITORY, shell=True, stdout=PIPE, stderr=PIPE, cwd=paths['ROOT_PATH'].encode(locale.getpreferredencoding()))  # Reference: http://blog.stastnarodina.com/honza-en/spot/python-unicodeencodeerror/
+            process = execute("git checkout . && git pull %s HEAD" % GIT_REPOSITORY, shell=True, stdout=PIPE,
+                              stderr=PIPE, cwd=paths.ROOT_PATH.encode(
+                    locale.getpreferredencoding()))  # Reference: http://blog.stastnarodina.com/honza-en/spot/python-unicodeencodeerror/
             pollProcess(process, True)
             stdout, stderr = process.communicate()
             success = not process.returncode
@@ -55,7 +59,6 @@ def update():
                 errMsg += "from GitHub (e.g. 'git clone https://github.com/Xyntax/POC-T.git POC-T')"
                 logger.error(errMsg)
             else:
-                logger.debug()
                 logger.error("update could not be completed ('%s')" % re.sub(r"\W+", " ", stderr).strip())
 
     if not success:

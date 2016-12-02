@@ -1,18 +1,25 @@
-# !/usr/bin/env python
-#  -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# author = i@cdxy.me
+# project = https://github.com/Xyntax/POC-T
 
-__author__ = 'xy'
 
 import os
 import subprocess
 
-VERSION = '1.4'
-VERSION_STRING = "POC-T"
+VERSION = '1.8.0'
+PROJECT = "POC-T"
 AUTHOR = 'cdxy'
 MAIL = 'i@cdxy.me'
 PLATFORM = os.name
-
+LICENSE = 'GPLv2'
 IS_WIN = subprocess.mswindows
+
+# essential methods/functions in costum scripts/PoC (such as function poc())
+# TODO add info() & exp().. here
+ESSENTIAL_MODULE_METHODS = [
+    'poc'
+]
 
 # Encoding used for Unicode data
 UNICODE_ENCODING = "utf-8"
@@ -34,5 +41,3 @@ BANNER = """\033[01;34m
 /_/                                  /_/
     \033[01;37m{\033[01;m Version %s by %s mail:%s \033[01;37m}\033[0m
 \n""" % (VERSION, AUTHOR, MAIL)
-
-# print BANNER

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-__author__ = 'xy'
+# author = i@cdxy.me
+# project = https://github.com/Xyntax/POC-T
 
 import sys
 from lib.core.settings import IS_WIN, UNICODE_ENCODING
@@ -35,7 +36,7 @@ def stdoutencode(data):
             retVal = output
         else:
             retVal = data.encode(sys.stdout.encoding)
-    except:
+    except Exception:
         retVal = data.encode(UNICODE_ENCODING) if isinstance(data, unicode) else data
 
     return retVal

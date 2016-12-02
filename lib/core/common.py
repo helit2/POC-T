@@ -1,15 +1,20 @@
-# !/usr/bin/env python
-#  -*- coding: utf-8 -*-
-__author__ = 'xy'
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# author = i@cdxy.me
+# project = https://github.com/Xyntax/POC-T
 
 import os
 import re
 import sys
 import time
+import logging
+import webbrowser
 from lib.core.data import *
+from lib.core.exception import *
 from lib.core.log import CUSTOM_LOGGING, LOGGER_HANDLER
 from lib.core.settings import BANNER, UNICODE_ENCODING, NULL, INVALID_UNICODE_CHAR_FORMAT
 from lib.core.convert import stdoutencode
+from lib.core.enums import EXIT_STATUS, ENGINE_MODE_STATUS
 from thirdparty.termcolor.termcolor import colored
 from thirdparty.odict.odict import OrderedDict
 
@@ -18,24 +23,27 @@ def setPaths():
     """
     Sets absolute paths for project directories and files
     """
-    ROOT_PATH = paths['ROOT_PATH']
-    paths['DATA_PATH'] = os.path.join(ROOT_PATH, "data")
-    paths['MODULES_PATH'] = os.path.join(ROOT_PATH, "module")
-    paths['OUTPUT_PATH'] = os.path.join(ROOT_PATH, "output")
-    if not os.path.exists(paths['MODULES_PATH']):
-        os.mkdir(paths['MODULES_PATH'])
-    if not os.path.exists(paths['OUTPUT_PATH']):
-        os.mkdir(paths['OUTPUT_PATH'])
-    if not os.path.exists(paths['DATA_PATH']):
-        os.mkdir(paths['DATA_PATH'])
-    try:
-        paths['WEAK_PASS'] = os.path.join(paths['DATA_PATH'], "pass100.txt")
-        paths['LARGE_WEAK_PASS'] = os.path.join(paths['DATA_PATH'], "pass1000.txt")
-        paths['UA_LIST_PATH'] = os.path.join(paths['DATA_PATH'], "user-agents.txt")
-    except Exception, e:
-        msg = 'Some files in ./data are missing, it may cause an issue\n'
+    ROOT_PATH = paths.ROOT_PATH
+    paths.DATA_PATH = os.path.join(ROOT_PATH, "data")
+    paths.SCRIPT_PATH = os.path.join(ROOT_PATH, "script")
+    paths.OUTPUT_PATH = os.path.join(ROOT_PATH, "output")
+    if not os.path.exists(paths.SCRIPT_PATH):
+        os.mkdir(paths.SCRIPT_PATH)
+    if not os.path.exists(paths.OUTPUT_PATH):
+        os.mkdir(paths.OUTPUT_PATH)
+    if not os.path.exists(paths.DATA_PATH):
+        os.mkdir(paths.DATA_PATH)
+
+    paths.WEAK_PASS = os.path.join(paths.DATA_PATH, "pass100.txt")
+    paths.LARGE_WEAK_PASS = os.path.join(paths.DATA_PATH, "pass1000.txt")
+    paths.UA_LIST_PATH = os.path.join(paths.DATA_PATH, "user-agents.txt")
+
+    if os.path.isfile(paths.WEAK_PASS) and os.path.isfile(paths.LARGE_WEAK_PASS) and os.path.isfile(paths.UA_LIST_PATH):
+        pass
+    else:
+        msg = 'Some files in ./data are missing, it may cause an issue.\n'
         msg += 'Please use \'--update\' to get the complete program from github.com.'
-        logger.log(CUSTOM_LOGGING.WARNING, msg)
+        raise ToolkitMissingPrivileges(msg)
 
 
 def checkFile(filename):
@@ -52,22 +60,22 @@ def checkFile(filename):
         try:
             with open(filename, "rb"):
                 pass
-        except:
+        except IOError:
             valid = False
 
     if not valid:
-        raise Exception("unable to read file '%s'" % filename)
+        raise ToolkitSystemException("unable to read file '%s'" % filename)
 
 
 def debugPause():
-    if conf['DEBUG']:
+    if conf.DEBUG:
         raw_input('[Debug] Press <Enter> to continue.')
 
 
 def showDebugData():
-    logger.log(CUSTOM_LOGGING.SYSINFO, '----conf---=\n%s' % conf)
-    logger.log(CUSTOM_LOGGING.SYSINFO, '----paths---=\n%s' % paths)
-    logger.log(CUSTOM_LOGGING.SYSINFO, '----th---=\n%s' % th)
+    logger.log(CUSTOM_LOGGING.SYSINFO, '----conf----\n%s' % conf)
+    logger.log(CUSTOM_LOGGING.SYSINFO, '----paths----\n%s' % paths)
+    logger.log(CUSTOM_LOGGING.SYSINFO, '----th----\n%s' % th)
     debugPause()
 
 
@@ -85,8 +93,9 @@ def dataToStdout(data, bold=False):
     """
     Writes text to the stdout (console) stream
     """
-    if conf['SCREEN_OUTPUT']:
-        message = ""
+    if conf.SCREEN_OUTPUT:
+        if conf.ENGINE is ENGINE_MODE_STATUS.THREAD:
+            logging._acquireLock()
 
         if isinstance(data, unicode):
             message = stdoutencode(data)
@@ -99,6 +108,9 @@ def dataToStdout(data, bold=False):
             sys.stdout.flush()
         except IOError:
             pass
+
+        if conf.ENGINE is ENGINE_MODE_STATUS.THREAD:
+            logging._releaseLock()
     return
 
 
@@ -185,7 +197,7 @@ def getUnicode(value, encoding=None, noneToNull=False):
             except UnicodeDecodeError, ex:
                 try:
                     return unicode(value, UNICODE_ENCODING)
-                except:
+                except Exception:
                     value = value[:ex.start] + "".join(
                         INVALID_UNICODE_CHAR_FORMAT % ord(_) for _ in value[ex.start:ex.end]) + value[ex.end:]
     else:
@@ -208,14 +220,18 @@ def isListLike(value):
     return isinstance(value, (list, tuple, set))
 
 
-def sysquit(status=0):
+def systemQuit(status=EXIT_STATUS.SYSETM_EXIT):
     sys.stdout.write('\n')
     sys.stdout.flush()
-    if status == 1:
-        logger.error('User quit!')
-    else:
+    if status == EXIT_STATUS.SYSETM_EXIT:
         logger.info('System exit.')
-    return
+    elif status == EXIT_STATUS.USER_QUIT:
+        logger.error('User quit!')
+    elif status == EXIT_STATUS.ERROR_EXIT:
+        logger.error('System exit.')
+    else:
+        raise ToolkitValueException('Invalid status code: %s' % str(status))
+    sys.exit(0)
 
 
 def getFileItems(filename, commentPrefix='#', unicode_=True, lowercase=False, unique=False):
@@ -258,6 +274,37 @@ def getFileItems(filename, commentPrefix='#', unicode_=True, lowercase=False, un
     except (IOError, OSError, MemoryError), ex:
         errMsg = "something went wrong while trying "
         errMsg += "to read the content of file '%s' ('%s')" % (filename, ex)
-        raise Exception(errMsg)
+        raise ToolkitSystemException(errMsg)
 
     return retVal if not unique else retVal.keys()
+
+
+def openBrowser():
+    path = conf.OUTPUT_FILE_PATH
+    try:
+        webbrowser.open_new_tab(path)
+    except Exception:
+        errMsg = '\n[ERROR] Fail to open file with web browser: %s' % path
+        raise ToolkitSystemException(errMsg)
+
+
+def checkSystemEncoding():
+    """
+    Checks for problematic encodings
+    """
+
+    if sys.getdefaultencoding() == "cp720":
+        try:
+            codecs.lookup("cp720")
+        except LookupError:
+            errMsg = "there is a known Python issue (#1616979) related "
+            errMsg += "to support for charset 'cp720'. Please visit "
+            errMsg += "'http://blog.oneortheother.info/tip/python-fix-cp720-encoding/index.html' "
+            errMsg += "and follow the instructions to be able to fix it"
+            logger.critical(errMsg)
+
+            warnMsg = "temporary switching to charset 'cp1256'"
+            logger.warn(warnMsg)
+
+            reload(sys)
+            sys.setdefaultencoding("cp1256")
